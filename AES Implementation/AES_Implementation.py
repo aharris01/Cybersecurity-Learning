@@ -1,8 +1,9 @@
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-from Crypto.Util.Padding import pad
-from os import urandom
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Util.number import bytes_to_long, long_to_bytes
 import hashlib
+import json
 
 def Encryption(username: str, password: str, hashAlgorithm):
     # Accept the message the user wants to encrypt then pad the given message to be a multiple of 16
@@ -23,6 +24,23 @@ def Encryption(username: str, password: str, hashAlgorithm):
     # Create a hash of the encrypted message
     hashAlgorithm.update(cipherText)
     messageHash = hashAlgorithm.hexdigest()
+    
+    # Write the IV, the encrypted message, and the message hash in a JSON file
+    encryptionInfo = {
+        "IV": bytes_to_long(iv), 
+        "Encrypted message": bytes_to_long(cipherText), 
+        "Hash": messageHash
+        }
+    
+    try:
+        # The following was taken from stackoverflow: https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
+        with open(f'{username}_encryption.json', 'w', encoding='utf-8') as file:
+            json.dump(encryptionInfo, file, ensure_ascii=False, indent=4)
+        
+        print("Encrypted message successfully saved")
+    except:
+        print("An error occured saving the encrypted message. Aborting")
+    
     
     
 
