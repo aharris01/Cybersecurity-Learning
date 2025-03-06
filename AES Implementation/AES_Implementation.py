@@ -1,13 +1,28 @@
 from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+from Crypto.Util.Padding import pad
 from os import urandom
 import hashlib
 
 def Encryption(username: str, password: str, hashAlgorithm):
+    # Accept the message the user wants to encrypt then pad the given message to be a multiple of 16
     message =  input("Enter the message you want to encrypt: ").encode()
+    message = pad(message, 16)
+    
+    # Create the encryption key
     hashAlgorithm.update(password.encode())
+    
+    # Create the encryption algorithm object in CBC mode with the hash key and a random IV
     key = hashAlgorithm.digest()
-    iv = urandom(16)
+    iv = get_random_bytes(16)
     encryptionAlgorithm = AES.new(key, AES.MODE_CBC, iv = iv)
+    
+    # Encrypt the padded messgae
+    cipherText = encryptionAlgorithm.encrypt(message)
+    
+    # Create a hash of the encrypted message
+    hashAlgorithm.update(cipherText)
+    messageHash = hashAlgorithm.hexdigest()
     
     
 
